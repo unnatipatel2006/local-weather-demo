@@ -2,169 +2,479 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>City Weather • Open‑Meteo</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Dashboard</title>
   <style>
-    body { background: #f8f9fa; }
-    .temp-display { font-size: 3rem; font-weight: 700; }
-    .muted { color: #6c757d; }
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --muted:#9ca3af;
+      --text:#e5e7eb;
+      --accent:#60a5fa;
+      --accent-2:#34d399;
+      --border:#1f2937;
+      --warn:#f59e0b;
+      --error:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% -10%, #1d243a 0%, rgba(15,23,42,0) 60%), var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .app{
+      width:100%;
+      max-width:900px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.35);
+      overflow:hidden;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:16px 18px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(96,165,250,0.10), rgba(96,165,250,0.0));
+    }
+    header h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:0.4px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    header h1 .logo{
+      display:inline-grid;
+      place-items:center;
+      width:28px;height:28px;
+      border-radius:8px;
+      background:linear-gradient(135deg, var(--accent), #8b5cf6);
+      color:white;
+      font-weight:900;
+      font-size:16px;
+      box-shadow:0 4px 14px rgba(96,165,250,0.45);
+    }
+    .controls{
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .search{
+      display:flex; gap:8px;
+      background: rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:6px;
+    }
+    .search input{
+      background: transparent;
+      border:none;
+      outline:none;
+      color:var(--text);
+      padding:8px 10px;
+      width:220px;
+    }
+    .btn{
+      background: linear-gradient(180deg, rgba(96,165,250,0.25), rgba(96,165,250,0.15));
+      border:1px solid rgba(96,165,250,0.45);
+      color: white;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      transition: transform .06s ease, filter .2s ease, background .2s ease;
+    }
+    .btn:hover{ filter:brightness(1.08) }
+    .btn:active{ transform: translateY(1px) }
+    .btn[disabled]{opacity:.6; cursor:not-allowed}
+    .toggle{
+      display:flex;
+      border:1px solid var(--border);
+      border-radius:10px;
+      overflow:hidden;
+      background:rgba(255,255,255,0.04);
+    }
+    .toggle button{
+      border:none;
+      background:none;
+      color:var(--text);
+      padding:8px 12px;
+      cursor:pointer;
+      min-width:56px;
+      font-weight:700;
+    }
+    .toggle button.active{
+      background: linear-gradient(180deg, rgba(52,211,153,0.25), rgba(52,211,153,0.12));
+      border-right:1px solid rgba(52,211,153,0.4);
+      border-left:1px solid rgba(52,211,153,0.4);
+      color:white;
+    }
+
+    main{
+      padding:18px;
+      display:grid;
+      gap:16px;
+    }
+    .status{
+      font-size:14px;
+      color:var(--muted);
+      min-height:18px;
+    }
+    .grid{
+      display:grid;
+      gap:16px;
+      grid-template-columns: 1.2fr 1fr;
+    }
+    .card{
+      background: rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px;
+    }
+    .card h3{
+      margin:0 0 10px 0;
+      font-size:15px;
+      color:#cbd5e1;
+      letter-spacing:.3px;
+    }
+    .current{
+      display:flex; gap:16px; align-items:center;
+    }
+    .current .icon{
+      font-size:48px;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,.4));
+    }
+    .current .temp{
+      font-size:48px; font-weight:800; line-height:1;
+    }
+    .current .meta{
+      display:flex; gap:6px; color:var(--muted); font-size:14px; flex-wrap:wrap;
+    }
+    .location{
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .location .city{
+      font-size:18px; font-weight:700;
+    }
+    .tag{
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid var(--border);
+      color:#cbd5e1;
+      padding:6px 8px;
+      border-radius:8px;
+      font-size:13px;
+    }
+    .forecast{
+      display:grid;
+      gap:10px;
+    }
+    .days{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+    .day{
+      background: rgba(255,255,255,0.02);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:12px;
+      display:grid;
+      gap:6px;
+      align-items:center;
+      justify-items:center;
+    }
+    .day .name{ font-weight:700; color:#d1d5db; }
+    .day .wicon{ font-size:22px }
+    .day .temps{ font-size:14px; color:#d1d5db }
+    .day .temps .min{ color:var(--muted) }
+    .muted{ color:var(--muted) }
+    .footer-note{
+      font-size:12px;
+      color:var(--muted);
+      text-align:right;
+    }
+    @media (max-width: 820px){
+      .grid{ grid-template-columns: 1fr }
+      .search input{ width:160px }
+    }
   </style>
 </head>
 <body>
-  <div class="container py-5">
-    <h1 class="mb-4 text-center">Check Current Weather</h1>
-
-    <form id="weatherForm" class="row g-2 justify-content-center">
-      <div class="col-12 col-md-6">
-        <input id="cityInput" class="form-control form-control-lg" type="text" placeholder="Enter city name (e.g., London)" aria-label="City name" required />
+  <div class="app">
+    <header>
+      <h1><span class="logo">W</span> Weather Dashboard</h1>
+      <div class="controls">
+        <div class="search">
+          <input id="cityInput" type="text" placeholder="Enter city (e.g., London)" autocomplete="off"/>
+          <button id="searchBtn" class="btn">Search</button>
+        </div>
+        <div class="toggle" role="group" aria-label="Temperature unit">
+          <button id="cBtn" class="active" aria-pressed="true">°C</button>
+          <button id="fBtn" aria-pressed="false">°F</button>
+        </div>
       </div>
-      <div class="col-12 col-md-auto d-grid">
-        <button id="searchBtn" class="btn btn-primary btn-lg" type="submit">
-          <span class="btn-text">Get Weather</span>
-          <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
-        </button>
-      </div>
-    </form>
-
-    <div id="alertBox" class="alert mt-4 d-none" role="alert"></div>
-
-    <div id="result" class="mt-4 d-none">
-      <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <div>
-            <strong id="cityTitle">City</strong>
-            <span id="regionTitle" class="muted"></span>
+    </header>
+    <main>
+      <div id="status" class="status"></div>
+      <div class="grid">
+        <section class="card">
+          <h3>Current Weather</h3>
+          <div id="current" class="current">
+            <div class="muted">Search a city to see current conditions.</div>
           </div>
-          <small class="text-muted" id="updatedTime"></small>
-        </div>
-        <div class="card-body">
-          <div class="row align-items-center">
-            <div class="col-md-6">
-              <div class="temp-display">
-                <span id="temperatureValue">--</span>
-                <span class="badge bg-secondary ms-2" id="temperatureUnit">°C</span>
-              </div>
-              <div class="muted mt-2">Current temperature</div>
-            </div>
-            <div class="col-md-6">
-              <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  Humidity
-                  <span class="badge bg-info text-dark" id="humidityValue">-- %</span>
-                </li>
-              </ul>
-            </div>
+        </section>
+        <section class="card">
+          <h3>Details</h3>
+          <div id="details" class="details">
+            <div class="muted">Feels like, wind and conditions will appear here.</div>
           </div>
-        </div>
-        <div class="card-footer text-muted small">
-          Data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open‑Meteo</a>
-        </div>
+        </section>
       </div>
-    </div>
+
+      <section class="card forecast">
+        <h3>3-Day Forecast</h3>
+        <div id="forecastDays" class="days">
+          <div class="muted" style="grid-column:1/-1">Search a city to load the forecast.</div>
+        </div>
+      </section>
+
+      <div class="footer-note">Powered by open-meteo.com (no API key required)</div>
+    </main>
   </div>
 
   <script>
-    const form = document.getElementById('weatherForm');
-    const cityInput = document.getElementById('cityInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const spinner = searchBtn.querySelector('.spinner-border');
-    const alertBox = document.getElementById('alertBox');
-    const resultWrap = document.getElementById('result');
+    const state = {
+      unit: 'C', // 'C' or 'F'
+      place: null, // { name, country, lat, lon }
+      current: null, // { tempC, feelsC, windKmh, code, isDay }
+      daily: null, // { times:[], minC:[], maxC:[], codes:[] }
+      timezone: 'auto'
+    };
 
-    const cityTitle = document.getElementById('cityTitle');
-    const regionTitle = document.getElementById('regionTitle');
-    const updatedTime = document.getElementById('updatedTime');
-    const temperatureValue = document.getElementById('temperatureValue');
-    const temperatureUnit = document.getElementById('temperatureUnit');
-    const humidityValue = document.getElementById('humidityValue');
+    const els = {
+      input: document.getElementById('cityInput'),
+      searchBtn: document.getElementById('searchBtn'),
+      status: document.getElementById('status'),
+      current: document.getElementById('current'),
+      details: document.getElementById('details'),
+      forecastDays: document.getElementById('forecastDays'),
+      cBtn: document.getElementById('cBtn'),
+      fBtn: document.getElementById('fBtn')
+    };
 
-    function setLoading(isLoading) {
-      searchBtn.disabled = isLoading;
-      spinner.classList.toggle('d-none', !isLoading);
-    }
-
-    function showAlert(message, type = 'danger') {
-      alertBox.className = `alert alert-${type} mt-4`;
-      alertBox.textContent = message;
-      alertBox.classList.remove('d-none');
-    }
-
-    function hideAlert() {
-      alertBox.classList.add('d-none');
-    }
-
-    async function geocodeCity(name) {
-      const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
-      url.searchParams.set('name', name);
-      url.searchParams.set('count', '1');
-      url.searchParams.set('language', 'en');
-      url.searchParams.set('format', 'json');
-
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Geocoding request failed.');
-      const data = await res.json();
-      if (!data.results || !data.results.length) {
-        throw new Error('City not found. Try a more specific name.');
+    // Weather code mapping
+    function codeToInfo(code, isDay = 1){
+      const map = [
+        [[0], { icon: isDay ? '☀️' : '🌙', label: isDay ? 'Clear sky' : 'Clear night' }],
+        [[1], { icon: isDay ? '🌤️' : '🌙', label: 'Mainly clear' }],
+        [[2], { icon: '⛅', label: 'Partly cloudy' }],
+        [[3], { icon: '☁️', label: 'Overcast' }],
+        [[45,48], { icon: '🌫️', label: 'Fog' }],
+        [[51,53,55,56,57], { icon: '🌦️', label: 'Drizzle' }],
+        [[61,63,65,66,67,80,81,82], { icon: '🌧️', label: 'Rain' }],
+        [[71,73,75,77,85,86], { icon: '❄️', label: 'Snow' }],
+        [[95,96,99], { icon: '⛈️', label: 'Thunderstorm' }]
+      ];
+      for(const [codes, info] of map){
+        if(codes.includes(code)) return info;
       }
-      return data.results[0]; // { latitude, longitude, name, country, admin1, ... }
+      return { icon:'🌡️', label:'Unknown' };
     }
 
-    async function fetchWeather(lat, lon) {
-      const url = new URL('https://api.open-meteo.com/v1/forecast');
-      url.searchParams.set('latitude', lat);
-      url.searchParams.set('longitude', lon);
-      url.searchParams.set('current', 'temperature_2m,relative_humidity_2m');
-      url.searchParams.set('timezone', 'auto');
-
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Weather request failed.');
-      return res.json();
+    // Conversion utilities
+    const cToF = c => (c * 9/5) + 32;
+    const fmtTemp = (v) => `${Math.round(v)}°${state.unit}`;
+    function convertTemp(c){
+      return state.unit === 'C' ? c : cToF(c);
     }
 
-    function renderResult(place, weather) {
-      const { name, country, admin1 } = place;
-      const { current, current_units } = weather;
-
-      cityTitle.textContent = name + (country ? `, ${country}` : '');
-      regionTitle.textContent = admin1 ? ` • ${admin1}` : '';
-
-      temperatureValue.textContent = current?.temperature_2m ?? '--';
-      temperatureUnit.textContent = current_units?.temperature_2m ?? '°C';
-
-      const rh = current?.relative_humidity_2m;
-      const rhUnit = current_units?.relative_humidity_2m ?? '%';
-      humidityValue.textContent = (rh ?? '--') + ' ' + rhUnit;
-
-      // Show local time as provided by API
-      updatedTime.textContent = current?.time ? `Updated: ${current.time} (${weather.timezone_abbreviation})` : '';
-
-      resultWrap.classList.remove('d-none');
+    // UI helpers
+    function setStatus(msg, tone=''){
+      els.status.textContent = msg || '';
+      els.status.style.color = tone === 'error' ? 'var(--error)' : tone === 'warn' ? 'var(--warn)' : 'var(--muted)';
+    }
+    function setLoading(loading){
+      els.searchBtn.disabled = loading;
+      els.input.disabled = loading;
+      setStatus(loading ? 'Loading weather...' : '');
     }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideAlert();
-      resultWrap.classList.add('d-none');
-
-      const query = cityInput.value.trim();
-      if (!query) {
-        showAlert('Please enter a city name.', 'warning');
+    // Render functions
+    function render(){
+      renderCurrent();
+      renderDetails();
+      renderForecast();
+      renderUnitToggle();
+    }
+    function renderUnitToggle(){
+      const cActive = state.unit === 'C';
+      els.cBtn.classList.toggle('active', cActive);
+      els.cBtn.setAttribute('aria-pressed', cActive ? 'true':'false');
+      els.fBtn.classList.toggle('active', !cActive);
+      els.fBtn.setAttribute('aria-pressed', !cActive ? 'true':'false');
+    }
+    function renderCurrent(){
+      const wrap = els.current;
+      wrap.innerHTML = '';
+      if(!state.place || !state.current){
+        wrap.innerHTML = '<div class="muted">Search a city to see current conditions.</div>';
         return;
       }
+      const { name, country } = state.place;
+      const { tempC, feelsC, windKmh, code, isDay } = state.current;
+      const info = codeToInfo(code, isDay);
 
+      const temp = fmtTemp(convertTemp(tempC));
+      const feels = fmtTemp(convertTemp(feelsC));
+
+      const block = document.createElement('div');
+      block.className = 'current';
+      block.innerHTML = `
+        <div class="icon" aria-hidden="true">${info.icon}</div>
+        <div class="location">
+          <div class="city">${name} <span class="muted">• ${country}</span></div>
+          <div class="temp">${temp}</div>
+          <div class="meta">
+            <span class="tag"><span>${info.icon}</span> ${info.label}</span>
+            <span class="tag">Feels like ${feels}</span>
+            <span class="tag">Wind ${Math.round(windKmh)} km/h</span>
+          </div>
+        </div>
+      `;
+      wrap.appendChild(block);
+    }
+    function renderDetails(){
+      const wrap = els.details;
+      wrap.innerHTML = '';
+      if(!state.current || !state.daily){
+        wrap.innerHTML = '<div class="muted">Feels like, wind and conditions will appear here.</div>';
+        return;
+      }
+      const { code, isDay } = state.current;
+      const info = codeToInfo(code, isDay);
+      const todayMin = fmtTemp(convertTemp(state.daily.minC[0]));
+      const todayMax = fmtTemp(convertTemp(state.daily.maxC[0]));
+
+      wrap.innerHTML = `
+        <div style="display:grid; gap:8px;">
+          <div class="tag" title="Condition"><span>${info.icon}</span> ${info.label}</div>
+          <div class="tag" title="Today range">Today: ${todayMin} / ${todayMax}</div>
+          <div class="muted">Tip: Use the °C/°F toggle to switch temperature units.</div>
+        </div>
+      `;
+    }
+    function renderForecast(){
+      const wrap = els.forecastDays;
+      wrap.innerHTML = '';
+      if(!state.daily){
+        wrap.innerHTML = '<div class="muted" style="grid-column:1/-1">Search a city to load the forecast.</div>';
+        return;
+      }
+      // Next 3 days (skip index 0 which is "today")
+      for(let i=1;i<=3;i++){
+        const day = document.createElement('div');
+        day.className = 'day';
+        const dt = new Date(state.daily.times[i]);
+        const name = dt.toLocaleDateString(undefined, { weekday: 'short' });
+        const iconInfo = codeToInfo(state.daily.codes[i], 1);
+        const min = fmtTemp(convertTemp(state.daily.minC[i]));
+        const max = fmtTemp(convertTemp(state.daily.maxC[i]));
+        day.innerHTML = `
+          <div class="name">${name}</div>
+          <div class="wicon" aria-hidden="true">${iconInfo.icon}</div>
+          <div class="temps"><span class="max">${max}</span> <span class="min">/ ${min}</span></div>
+        `;
+        wrap.appendChild(day);
+      }
+    }
+
+    // Fetch and data handling
+    async function searchCity(name){
+      if(!name || !name.trim()){
+        setStatus('Please enter a city name.', 'warn');
+        return;
+      }
       setLoading(true);
-      try {
-        const place = await geocodeCity(query);
-        const weather = await fetchWeather(place.latitude, place.longitude);
-        renderResult(place, weather);
-      } catch (err) {
+      try{
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name.trim())}&count=1&language=en&format=json`;
+        const geoRes = await fetch(geoUrl);
+        if(!geoRes.ok) throw new Error('Geocoding failed');
+        const geo = await geoRes.json();
+        if(!geo.results || geo.results.length === 0){
+          throw new Error('No matching locations found');
+        }
+        const g = geo.results[0];
+        state.place = { name: g.name, country: g.country_code || g.country || '', lat: g.latitude, lon: g.longitude };
+        // Fetch forecast and current
+        const wxUrl = new URL('https://api.open-meteo.com/v1/forecast');
+        wxUrl.searchParams.set('latitude', state.place.lat);
+        wxUrl.searchParams.set('longitude', state.place.lon);
+        wxUrl.searchParams.set('current', 'temperature_2m,apparent_temperature,is_day,weather_code,wind_speed_10m');
+        wxUrl.searchParams.set('daily', 'weather_code,temperature_2m_max,temperature_2m_min');
+        wxUrl.searchParams.set('timezone', 'auto');
+        wxUrl.searchParams.set('forecast_days', '4'); // today + next 3
+        const wxRes = await fetch(wxUrl.toString());
+        if(!wxRes.ok) throw new Error('Weather fetch failed');
+        const wx = await wxRes.json();
+
+        state.current = {
+          tempC: wx.current.temperature_2m,
+          feelsC: wx.current.apparent_temperature,
+          windKmh: wx.current.wind_speed_10m,
+          code: wx.current.weather_code,
+          isDay: wx.current.is_day
+        };
+        state.daily = {
+          times: wx.daily.time.map(t => t + 'T12:00:00'), // midday for consistent weekday names
+          minC: wx.daily.temperature_2m_min,
+          maxC: wx.daily.temperature_2m_max,
+          codes: wx.daily.weather_code
+        };
+
+        setStatus('');
+        render();
+      } catch(err){
         console.error(err);
-        showAlert(err.message || 'Something went wrong. Please try again.');
-      } finally {
+        setStatus(err.message || 'Something went wrong.', 'error');
+      } finally{
         setLoading(false);
       }
+    }
+
+    // Event listeners
+    els.searchBtn.addEventListener('click', ()=> searchCity(els.input.value));
+    els.input.addEventListener('keydown', (e)=> {
+      if(e.key === 'Enter') searchCity(els.input.value);
     });
+    els.cBtn.addEventListener('click', ()=>{
+      if(state.unit !== 'C'){
+        state.unit = 'C';
+        render();
+      }
+    });
+    els.fBtn.addEventListener('click', ()=>{
+      if(state.unit !== 'F'){
+        state.unit = 'F';
+        render();
+      }
+    });
+
+    // Optional: try to load a sensible default
+    (function loadDefault(){
+      const guess = ['New York','London','Tokyo','Paris','Sydney'];
+      const pick = guess[Math.floor(Math.random()*guess.length)];
+      els.input.value = pick;
+      searchCity(pick);
+    })();
   </script>
 </body>
 </html>
