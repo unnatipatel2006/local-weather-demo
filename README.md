@@ -1,24 +1,23 @@
-# City Weather (Open‑Meteo)
+# Weather Dashboard
 
 ## Overview
-A minimal single-page app that fetches the current temperature and humidity for any city using the Open‑Meteo public APIs (no API key required). Styled with Bootstrap 5.
+A lightweight weather dashboard that lets you search any city and view:
+- Current conditions with temperature, feels-like, wind speed, and a weather icon.
+- A 3-day forecast with min/max temperatures and small icons.
+- A unit toggle to switch temperatures between Celsius and Fahrenheit.
+
+No API keys required (powered by open-meteo.com).
 
 ## Setup
-- No build step needed.
-- Open index.html directly in a browser, or serve it with any static server.
+- Download index.html and open it in any modern browser.
+- Internet connection is required to fetch weather data.
 
 ## Usage
-- Enter a city name (e.g., London, Tokyo) and click “Get Weather”.
-- The page will display current temperature and relative humidity for the location.
-- If multiple places share the name, try a more specific query (e.g., “Paris, Texas”).
+- Enter a city name (e.g., "Berlin") and click Search or press Enter.
+- Toggle between °C and °F using the control in the header.
+- Current weather appears first, with the 3-day forecast below it.
 
-## License
-MIT License
-
-Copyright (c) 2025
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## Improvements in Round 2
+- Added a 3-day forecast section beneath the current weather.
+- Introduced a temperature unit toggle (Celsius/Fahrenheit) affecting both current and forecast temperatures.
+- Displayed small weather icons for both current conditions and each forecast day.
